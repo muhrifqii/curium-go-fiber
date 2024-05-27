@@ -2,25 +2,25 @@ package main
 
 import (
 	"github.com/bytedance/sonic"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
+	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 )
 
 type Server struct {
 	App *fiber.App
 }
 
-func NewServer() *Server {
+func NewServer(conf config.ApiConfig) *Server {
 	app := fiber.New(fiber.Config{
 		CaseSensitive:            true,
 		DisableHeaderNormalizing: true,
 		JSONEncoder:              sonic.Marshal,
 		JSONDecoder:              sonic.Unmarshal,
+		ErrorHandler:             errorHandler,
 	})
-	// api := app.Group("/api")
 
-	// apiV1 := api.Group("/v1")
-
-	app.Use(func(c fiber.Ctx) error {
+	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404)
 	})
 
@@ -29,6 +29,6 @@ func NewServer() *Server {
 	}
 }
 
-func notFound(c fiber.Ctx) error {
-	return c.SendStatus(404)
+func errorHandler(c *fiber.Ctx, err error) error {
+	return api_error.ApiErrorResponseHandler(c, err)
 }

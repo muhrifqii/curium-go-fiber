@@ -21,3 +21,9 @@ type User struct {
 	Gender    string
 	Avatar    string
 }
+
+func NewUser() User {
+	return User{
+		ID: 1,
+	}
+}
