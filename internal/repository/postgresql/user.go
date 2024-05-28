@@ -25,7 +25,7 @@ func (r *UserRepository) GetByIdentifier(c context.Context, identifier string) (
 		BaseModel: domain.BaseModel{
 			ID: 1,
 		},
-		Username: "muhrifqii",
+		Username: identifier,
 		Email:    "muh_rif@live.com",
 		Password: "123123123",
 	}, nil
