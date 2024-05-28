@@ -5,24 +5,42 @@ import (
 	"strconv"
 )
 
-type DbConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
-}
+type (
+	AppConfig struct {
+		DevMode bool
+	}
 
-type ApiConfig struct {
-	Port           string
-	ApiPrefix      string
-	AllowedOrigins string
-}
+	DbConfig struct {
+		Host     string
+		Port     string
+		User     string
+		Password string
+		Name     string
+	}
 
-type JwtConfig struct {
-	Secret     string
-	Expiration int
-	CookieName string
+	ApiConfig struct {
+		Port            string
+		ApiPrefix       string
+		AllowedOrigins  string
+		HeaderRequestID string
+	}
+
+	JwtConfig struct {
+		Secret     string
+		Expiration int
+		CookieName string
+	}
+)
+
+func InitAppConfig() AppConfig {
+	isDev, err := strconv.ParseBool(os.Getenv("DEV"))
+	if err != nil {
+		isDev = false
+	}
+
+	return AppConfig{
+		DevMode: isDev,
+	}
 }
 
 func InitDbConfig() DbConfig {
@@ -37,9 +55,10 @@ func InitDbConfig() DbConfig {
 
 func InitApiConfig() ApiConfig {
 	return ApiConfig{
-		Port:           ":" + os.Getenv("SERVER_PORT"),
-		ApiPrefix:      os.Getenv("SERVER_API_PREFIX"),
-		AllowedOrigins: os.Getenv("SERVER_ALLOW_ORIGINS"),
+		Port:            ":" + os.Getenv("SERVER_PORT"),
+		ApiPrefix:       os.Getenv("SERVER_API_PREFIX"),
+		AllowedOrigins:  os.Getenv("SERVER_ALLOW_ORIGINS"),
+		HeaderRequestID: os.Getenv("HEADER_REQ_ID"),
 	}
 }
 

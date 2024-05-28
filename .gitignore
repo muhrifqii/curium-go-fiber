@@ -78,3 +78,6 @@ go.work
 go.work.sum
 
 .env
+bin/
+api_server
+tmp_app/

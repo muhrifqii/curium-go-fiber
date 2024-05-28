@@ -1,0 +1,38 @@
+version: '3.7'
+
+networks:
+  intranet:
+    external: false
+
+services:
+  web:
+    image: curium-go-fiber
+    container_name: curium_go_fiber_api
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - intranet
+    env_file:
+      - .env
+  db:
+    image: postgres:13.15
+    container_name: curium_go_fiber_db
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASS}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - ${DATABASE_PORT}:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    networks:
+      - intranet
+    env_file:
+      - .env

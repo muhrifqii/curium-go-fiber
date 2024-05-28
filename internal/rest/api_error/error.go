@@ -35,5 +35,20 @@ func ApiErrorResponseHandler(c *fiber.Ctx, err error) error {
 
 	}
 
-	return c.Status(code).JSON(r)
+	return c.Status(code).JSON(*r)
+}
+
+func JwtErrorResponseHandler(c *fiber.Ctx, err error) error {
+	var r = ApiErrorResponse{
+		ApiResponse: dto.ApiResponse[interface{}]{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		},
+	}
+	if err.Error() == "Missing or malformed JWT" {
+		return c.Status(fiber.StatusBadRequest).JSON(r)
+	}
+	r.Message = "Unauthorized"
+	return c.Status(fiber.StatusUnauthorized).JSON(r)
 }

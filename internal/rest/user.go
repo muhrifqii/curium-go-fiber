@@ -32,7 +32,7 @@ func (h *UserHandler) GetUserByIdentifier(c *fiber.Ctx) error {
 	identifier := c.Params("identifier")
 	user, err := h.userService.GetUserByIdentifier(c.Context(), identifier)
 	if err != nil {
-		return ReturnErrorResponse(c, fiber.StatusInternalServerError, err)
+		return err
 	}
 	return c.Status(fiber.StatusOK).JSON(user)
 }
