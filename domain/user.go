@@ -5,19 +5,19 @@ import "time"
 type User struct {
 	BaseModel
 
-	Username string
-	Email    string
-	Phone    string
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 
-	Password string
-	Salt     string
+	Password string `json:"-"`
+	Salt     string `json:"-"`
 
-	Status    string
-	LastLogin time.Time
+	Status    string    `json:"status"`
+	LastLogin time.Time `json:"last_login"`
 
-	FirstName string
-	LastName  string
-	Birthday  time.Time
-	Gender    string
-	Avatar    string
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Birthday  time.Time `json:"birth_date"`
+	Gender    string    `json:"gender"`
+	Avatar    string    `json:"avatar"`
 }

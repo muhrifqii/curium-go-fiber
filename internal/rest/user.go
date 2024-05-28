@@ -7,17 +7,19 @@ import (
 	"github.com/muhrifqii/curium_go_fiber/domain"
 )
 
-// Representation of User's Usecases
-//
-//go:generate mockery --name ArticleService
-type UserService interface {
-	GetUserByIdentifier(ctx context.Context, identifier string) (domain.User, error)
-	CreateUser(ctx context.Context, user domain.User) error
-}
+type (
+	// Representation of User's Usecases
+	//
+	//go:generate mockery --name ArticleService
+	UserService interface {
+		GetUserByIdentifier(ctx context.Context, identifier string) (domain.User, error)
+		CreateUser(ctx context.Context, user domain.User) error
+	}
 
-type UserHandler struct {
-	userService UserService
-}
+	UserHandler struct {
+		userService UserService
+	}
+)
 
 func NewUserHandler(router fiber.Router, svc UserService) {
 	handler := &UserHandler{
