@@ -10,6 +10,7 @@ import (
 func SetZapLogger(l *zap.Logger) {
 	zapLogger := fiberzap.NewLogger(fiberzap.LoggerConfig{
 		SetLogger: l,
+		ExtraKeys: []string{"requestId"},
 	})
 	log.SetLogger(zapLogger)
 }
@@ -17,5 +18,10 @@ func SetZapLogger(l *zap.Logger) {
 func Logger(l *zap.Logger) fiber.Handler {
 	return fiberzap.New(fiberzap.Config{
 		Logger: l,
+		FieldsFunc: func(c *fiber.Ctx) []zap.Field {
+			return []zap.Field{
+				zap.String("requestId", c.Get("requestId")),
+			}
+		},
 	})
 }

@@ -28,9 +28,7 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger) *Server {
 	app.Use(middleware.RequestID(conf))
 	app.Use(middleware.Logger(logger))
 
-	// app.Use(func(c *fiber.Ctx) error {
-	// 	return c.SendStatus(404)
-	// })
+	middleware.SetZapLogger(logger)
 
 	return &Server{
 		app:    app,

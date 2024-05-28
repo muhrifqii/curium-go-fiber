@@ -1,8 +1,8 @@
 version: '3.7'
 
-networks:
-  intranet:
-    external: false
+# networks:
+#   intranet:
+#     external: false
 
 services:
   web:
@@ -13,8 +13,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    networks:
-      - intranet
+    # networks:
+    #   - intranet
     env_file:
       - .env
   db:
@@ -32,7 +32,7 @@ services:
       interval: 30s
       timeout: 20s
       retries: 5
-    networks:
-      - intranet
+    # networks:
+    #   - intranet
     env_file:
       - .env
