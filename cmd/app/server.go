@@ -4,8 +4,11 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/repository/postgresql"
+	"github.com/muhrifqii/curium_go_fiber/internal/rest"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/middleware"
+	"github.com/muhrifqii/curium_go_fiber/usecase/user"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +32,15 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger) *Server {
 	app.Use(middleware.Logger(logger))
 
 	middleware.SetZapLogger(logger)
+
+	apiV1 := app.Group(conf.ApiPrefix + "/v1")
+
+	// prepare repository layer
+	userRepository := postgresql.NewUserRepository(nil)
+
+	// build service layer
+	svc := user.NewService(userRepository)
+	rest.NewUserHandler(apiV1, svc)
 
 	return &Server{
 		app:    app,

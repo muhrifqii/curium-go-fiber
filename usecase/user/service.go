@@ -22,3 +22,11 @@ func NewService(userRepository UserRepository) *Service {
 		userRepository: userRepository,
 	}
 }
+
+func (s *Service) GetUserByIdentifier(ctx context.Context, identifier string) (domain.User, error) {
+	return s.userRepository.GetByIdentifier(ctx, identifier)
+}
+
+func (s *Service) CreateUser(ctx context.Context, user domain.User) error {
+	return s.userRepository.CreateUser(ctx, user)
+}

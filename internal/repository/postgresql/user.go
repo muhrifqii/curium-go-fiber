@@ -30,3 +30,7 @@ func (r *UserRepository) GetByIdentifier(c context.Context, identifier string) (
 		Password: "123123123",
 	}, nil
 }
+
+func (r *UserRepository) CreateUser(c context.Context, user domain.User) error {
+	return nil
+}

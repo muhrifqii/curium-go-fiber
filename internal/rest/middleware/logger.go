@@ -20,7 +20,7 @@ func Logger(l *zap.Logger) fiber.Handler {
 		Logger: l,
 		FieldsFunc: func(c *fiber.Ctx) []zap.Field {
 			return []zap.Field{
-				zap.String("requestId", c.Get("requestId")),
+				zap.String("requestId", c.Context().UserValue("requestId").(string)),
 			}
 		},
 	})
