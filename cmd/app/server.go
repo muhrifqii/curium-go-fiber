@@ -30,10 +30,14 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger) *Server {
 	app.Use(middleware.Cors(conf))
 	app.Use(middleware.RequestID(conf))
 	app.Use(middleware.Logger(logger))
+	app.Use(middleware.RateLimiter(50))
+	app.Use(middleware.ActuatorHealthCheck())
 
 	middleware.SetZapLogger(logger)
 
-	apiV1 := app.Group(conf.ApiPrefix + "/v1")
+	apiPath := conf.ApiPrefix + "/v1"
+	apiV1 := app.Group(apiPath)
+	publicApiV1 := app.Group(apiPath)
 
 	// prepare repository layer
 	userRepository := postgresql.NewUserRepository(nil)
@@ -41,6 +45,7 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger) *Server {
 	// build service layer
 	svc := user.NewService(userRepository)
 	rest.NewUserHandler(apiV1, svc)
+	rest.NewAuthnHandler(publicApiV1, nil)
 
 	return &Server{
 		app:    app,

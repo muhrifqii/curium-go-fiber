@@ -26,7 +26,7 @@ func NewUserHandler(router fiber.Router, svc UserService) {
 		userService: svc,
 	}
 
-	userRoute := router.Group("/user")
+	userRoute := router.Group("/users")
 	userRoute.Get("/:identifier", handler.GetUserByIdentifier)
 }
 
