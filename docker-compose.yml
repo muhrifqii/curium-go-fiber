@@ -15,8 +15,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # networks:
-    #   - intranet
 
   db:
     image: postgres:13.15
@@ -35,6 +33,22 @@ services:
       interval: 30s
       timeout: 20s
       retries: 5
-    # networks:
-    #   - intranet
 
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: curium_go_fiber_loki
+    ports:
+      - 3131:3100
+    volumes:
+      - ./infras/loki:/etc/loki
+    command: -config.file=/etc/loki/loki-config.yml
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: curium_go_fiber_grafana
+    ports:
+      - 3030:3000
+    depends_on:
+      - loki
+    volumes:
+      - ./infras/grafana:/etc/grafana/provisioning

@@ -41,7 +41,6 @@ func InitializeApp() (*AppProvider, error) {
 func InitializeLog(appConf config.AppConfig) (*zap.Logger, error) {
 	var (
 		logLevel zapcore.Level
-		encoding string
 	)
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
@@ -49,10 +48,8 @@ func InitializeLog(appConf config.AppConfig) (*zap.Logger, error) {
 
 	if appConf.DevMode {
 		logLevel = zapcore.DebugLevel
-		encoding = "console"
 	} else {
 		logLevel = zapcore.InfoLevel
-		encoding = "json"
 	}
 
 	cfg := zap.Config{
@@ -61,7 +58,7 @@ func InitializeLog(appConf config.AppConfig) (*zap.Logger, error) {
 		DisableCaller:     false,
 		DisableStacktrace: false,
 		Sampling:          nil,
-		Encoding:          encoding,
+		Encoding:          "json",
 		EncoderConfig:     encoderCfg,
 		OutputPaths:       []string{"stdout"},
 		ErrorOutputPaths:  []string{"stderr"},
