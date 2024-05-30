@@ -38,10 +38,17 @@ services:
     image: grafana/loki:3.0.0
     container_name: curium_go_fiber_loki
     ports:
-      - 3131:3100
+      - 3131:3131
     volumes:
-      - ./infras/loki:/etc/loki
-    command: -config.file=/etc/loki/loki-config.yml
+      - ./infras/loki:/mnt/config
+    command: -config.file=/mnt/config/loki-config.yml
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: curium_go_fiber_promtail
+    volumes:
+      - ./infras/loki:/mnt/config
+    command: -config.file=/mnt/config/promtail-config.yml
 
   grafana:
     image: grafana/grafana:11.0.0
