@@ -7,7 +7,14 @@ import (
 
 type (
 	AppConfig struct {
-		DevMode bool
+		DevMode   bool
+		LogConfig LogConfig
+	}
+
+	LogConfig struct {
+		LogFileName    string
+		LogFileMaxSize int
+		LogFileMaxDays int
 	}
 
 	DbConfig struct {
@@ -38,8 +45,22 @@ func InitAppConfig() AppConfig {
 		isDev = false
 	}
 
+	logMaxSize, err := strconv.ParseInt(os.Getenv("LOG_FILE_MAX_SIZE"), 10, 32)
+	if err != nil {
+		logMaxSize = 10
+	}
+	logMaxDays, err := strconv.ParseInt(os.Getenv("LOG_FILE_MAX_DAYS"), 10, 32)
+	if err != nil {
+		logMaxDays = 60
+	}
+
 	return AppConfig{
 		DevMode: isDev,
+		LogConfig: LogConfig{
+			LogFileName:    os.Getenv("LOG_FILE"),
+			LogFileMaxSize: int(logMaxSize),
+			LogFileMaxDays: int(logMaxDays),
+		},
 	}
 }
 

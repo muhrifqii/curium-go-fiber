@@ -2,12 +2,12 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/muhrifqii/curium_go_fiber/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func init() {
@@ -25,10 +25,7 @@ type AppProvider struct {
 func InitializeApp() (*AppProvider, error) {
 	appConf := config.InitAppConfig()
 
-	logger, err := InitializeLog(appConf)
-	if err != nil {
-		return nil, err
-	}
+	logger := InitializeLog(appConf)
 
 	server := InitializeServer(logger)
 
@@ -38,33 +35,38 @@ func InitializeApp() (*AppProvider, error) {
 	}, nil
 }
 
-func InitializeLog(appConf config.AppConfig) (*zap.Logger, error) {
+func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	var (
-		logLevel zapcore.Level
+		logLevel   zapcore.Level
+		stackLevel zapcore.Level
 	)
+
+	logConf := appConf.LogConfig
+	if appConf.DevMode {
+		logLevel = zapcore.DebugLevel
+		stackLevel = zapcore.WarnLevel
+	} else {
+		logLevel = zapcore.InfoLevel
+		stackLevel = zapcore.ErrorLevel
+	}
+
+	writer := zapcore.AddSync(&lumberjack.Logger{
+		Filename: logConf.LogFileName,
+		MaxSize:  logConf.LogFileMaxSize,
+		MaxAge:   logConf.LogFileMaxDays,
+		Compress: !appConf.DevMode,
+	})
+
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderCfg.TimeKey = "timestamp"
 
-	if appConf.DevMode {
-		logLevel = zapcore.DebugLevel
-	} else {
-		logLevel = zapcore.InfoLevel
-	}
-
-	cfg := zap.Config{
-		Level:             zap.NewAtomicLevelAt(logLevel),
-		Development:       appConf.DevMode,
-		DisableCaller:     false,
-		DisableStacktrace: false,
-		Sampling:          nil,
-		Encoding:          "json",
-		EncoderConfig:     encoderCfg,
-		OutputPaths:       []string{"stdout"},
-		ErrorOutputPaths:  []string{"stderr"},
-		InitialFields:     map[string]interface{}{"pid": os.Getpid()},
-	}
-	return cfg.Build()
+	coreLogger := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderCfg),
+		writer,
+		zap.NewAtomicLevelAt(logLevel),
+	)
+	return zap.New(coreLogger, zap.AddCaller(), zap.AddStacktrace(stackLevel))
 }
 
 func InitializeServer(logger *zap.Logger) *Server {

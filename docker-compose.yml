@@ -48,6 +48,7 @@ services:
     container_name: curium_go_fiber_promtail
     volumes:
       - ./infras/loki:/mnt/config
+      - ./infras/logs:/etc/serverlog
     command: -config.file=/mnt/config/promtail-config.yml
 
   grafana:
