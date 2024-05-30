@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/muhrifqii/curium_go_fiber/config"
@@ -38,16 +39,15 @@ func InitializeApp() (*AppProvider, error) {
 func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	var (
 		logLevel   zapcore.Level
-		stackLevel zapcore.Level
+		stackLevel zapcore.Level = zapcore.ErrorLevel
+		coreLogger zapcore.Core
 	)
 
 	logConf := appConf.LogConfig
 	if appConf.DevMode {
 		logLevel = zapcore.DebugLevel
-		stackLevel = zapcore.WarnLevel
 	} else {
 		logLevel = zapcore.InfoLevel
-		stackLevel = zapcore.ErrorLevel
 	}
 
 	writer := zapcore.AddSync(&lumberjack.Logger{
@@ -61,11 +61,28 @@ func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderCfg.TimeKey = "timestamp"
 
-	coreLogger := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderCfg),
+	jsonEncoder := zapcore.NewJSONEncoder(encoderCfg)
+
+	loggerWritter := zapcore.NewCore(
+		jsonEncoder,
 		writer,
 		zap.NewAtomicLevelAt(logLevel),
 	)
+
+	if appConf.DevMode {
+		loggerConsole := zapcore.NewCore(
+			zapcore.NewConsoleEncoder(encoderCfg),
+			zapcore.AddSync(os.Stdout),
+			zap.NewAtomicLevelAt(logLevel),
+		)
+		coreLogger = zapcore.NewTee(
+			loggerWritter,
+			loggerConsole,
+		)
+	} else {
+		coreLogger = loggerWritter
+	}
+
 	return zap.New(coreLogger, zap.AddCaller(), zap.AddStacktrace(stackLevel))
 }
 

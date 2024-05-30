@@ -81,3 +81,4 @@ go.work.sum
 bin/
 api_server
 tmp_app/
+*.log
