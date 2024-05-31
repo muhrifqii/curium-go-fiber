@@ -6,6 +6,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -21,6 +22,7 @@ func init() {
 type AppProvider struct {
 	log    *zap.Logger
 	server *Server
+	rdb    *redis.Client
 }
 
 func InitializeApp() (*AppProvider, error) {
@@ -30,9 +32,12 @@ func InitializeApp() (*AppProvider, error) {
 
 	server := InitializeServer(logger)
 
+	rdb := InitializeRedis(appConf)
+
 	return &AppProvider{
 		log:    logger,
 		server: server,
+		rdb:    rdb,
 	}, nil
 }
 
@@ -86,6 +91,14 @@ func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	return zap.New(coreLogger, zap.AddCaller(), zap.AddStacktrace(stackLevel))
 }
 
+func InitializeRedis(appConf config.AppConfig) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     appConf.RedisAddresss,
+		Password: "",
+		DB:       0,
+	})
+}
+
 func InitializeServer(logger *zap.Logger) *Server {
 	apiConf := config.InitApiConfig()
 
@@ -97,6 +110,7 @@ func main() {
 	log := app.log
 
 	defer log.Sync()
+	defer app.rdb.Close()
 
 	if err != nil {
 		log.Fatal("Failed to initialize server:", zap.Error(err))

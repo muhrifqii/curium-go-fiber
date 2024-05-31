@@ -7,8 +7,9 @@ import (
 
 type (
 	AppConfig struct {
-		DevMode   bool
-		LogConfig LogConfig
+		DevMode       bool
+		LogConfig     LogConfig
+		RedisAddresss string
 	}
 
 	LogConfig struct {
@@ -61,6 +62,7 @@ func InitAppConfig() AppConfig {
 			LogFileMaxSize: int(logMaxSize),
 			LogFileMaxDays: int(logMaxDays),
 		},
+		RedisAddresss: "localhost:" + os.Getenv("REDIS_PORT"),
 	}
 }
 

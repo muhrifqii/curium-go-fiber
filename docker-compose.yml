@@ -15,6 +15,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - intranet
 
@@ -37,6 +39,23 @@ services:
       retries: 5
     networks:
       - intranet
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  redis:
+    image: redis:7.0.15-alpine
+    container_name: curium_go_fiber_redis
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   loki:
     image: grafana/loki:3.0.0
@@ -67,6 +86,10 @@ services:
     command: -config.file=/mnt/config/promtail-config.yml
     networks:
       - intranet
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 64M
 
   grafana:
     image: grafana/grafana:11.0.0
