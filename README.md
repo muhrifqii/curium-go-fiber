@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/289.svg" />
+  <img src="https://raw.githubusercontent.com/muhrifqii/curium-go-fiber/master/assets/cm_pertable.png" />
 </p>
 <h1 align="center"><i>Curium</i> GoFiber (with steroids)</h1>
 <p align="center">
