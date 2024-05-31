@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -25,20 +26,23 @@ type AppProvider struct {
 	rdb    *redis.Client
 }
 
-func InitializeApp() (*AppProvider, error) {
+func InitializeApp() *AppProvider {
 	appConf := config.InitAppConfig()
 
 	logger := InitializeLog(appConf)
 
 	server := InitializeServer(logger)
 
-	rdb := InitializeRedis(appConf)
+	rdb, err := InitializeRedis(appConf)
+	if err != nil {
+		logger.Fatal("Could not connect to Redis", zap.Error(err))
+	}
 
 	return &AppProvider{
 		log:    logger,
 		server: server,
 		rdb:    rdb,
-	}, nil
+	}
 }
 
 func InitializeLog(appConf config.AppConfig) *zap.Logger {
@@ -91,12 +95,17 @@ func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	return zap.New(coreLogger, zap.AddCaller(), zap.AddStacktrace(stackLevel))
 }
 
-func InitializeRedis(appConf config.AppConfig) *redis.Client {
-	return redis.NewClient(&redis.Options{
+func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
+	rdb := redis.NewClient(&redis.Options{
 		Addr:     appConf.RedisAddresss,
 		Password: "",
 		DB:       0,
 	})
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
+	return rdb, nil
 }
 
 func InitializeServer(logger *zap.Logger) *Server {
@@ -106,15 +115,12 @@ func InitializeServer(logger *zap.Logger) *Server {
 }
 
 func main() {
-	app, err := InitializeApp()
+	app := InitializeApp()
 	log := app.log
 
 	defer log.Sync()
 	defer app.rdb.Close()
 
-	if err != nil {
-		log.Fatal("Failed to initialize server:", zap.Error(err))
-	}
 	if err := app.server.Run(); err != nil {
 		log.Fatal("Failed to start server:", zap.Error(err))
 	}

@@ -39,23 +39,19 @@ services:
       retries: 5
     networks:
       - intranet
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 128M
 
   redis:
     image: redis:7.0.15-alpine
     container_name: curium_go_fiber_redis
     restart: on-failure
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
+    env_file:
+      - .env
+    ports:
+      - ${REDIS_PORT}:6379
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 128M
 
   loki:
     image: grafana/loki:3.0.0
