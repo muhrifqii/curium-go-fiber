@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 )
 
-func RateLimiter(max int) fiber.Handler {
+func RateLimiter(max int, storage fiber.Storage) fiber.Handler {
 	return limiter.New(limiter.Config{
 		Max:               max,
 		Expiration:        30 * time.Second,
@@ -15,10 +15,11 @@ func RateLimiter(max int) fiber.Handler {
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
 		},
+		Storage: storage,
 	})
 }
 
-func RateLimiterWithKey(max int, keyFn func(*fiber.Ctx) string) fiber.Handler {
+func RateLimiterWithKey(max int, storage fiber.Storage, keyFn func(*fiber.Ctx) string) fiber.Handler {
 	if keyFn == nil {
 		keyFn = func(c *fiber.Ctx) string {
 			return c.IP()
@@ -29,5 +30,6 @@ func RateLimiterWithKey(max int, keyFn func(*fiber.Ctx) string) fiber.Handler {
 		Expiration:        30 * time.Second,
 		LimiterMiddleware: limiter.SlidingWindow{},
 		KeyGenerator:      keyFn,
+		Storage:           storage,
 	})
 }

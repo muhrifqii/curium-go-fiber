@@ -31,12 +31,12 @@ func InitializeApp() *AppProvider {
 
 	logger := InitializeLog(appConf)
 
-	server := InitializeServer(logger)
-
 	rdb, err := InitializeRedis(appConf)
 	if err != nil {
 		logger.Fatal("Could not connect to Redis", zap.Error(err))
 	}
+
+	server := InitializeServer(logger, rdb)
 
 	return &AppProvider{
 		log:    logger,
@@ -108,10 +108,10 @@ func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
 	return rdb, nil
 }
 
-func InitializeServer(logger *zap.Logger) *Server {
+func InitializeServer(logger *zap.Logger, rdb *redis.Client) *Server {
 	apiConf := config.InitApiConfig()
 
-	return NewServer(apiConf, logger)
+	return NewServer(apiConf, logger, rdb)
 }
 
 func main() {

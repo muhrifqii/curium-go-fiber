@@ -25,7 +25,7 @@ func NewAuthnHandler(router fiber.Router, svc AuthnService) {
 		authnService: svc,
 	}
 
-	authnRoute := router.Group("", middleware.RateLimiter(10))
+	authnRoute := router.Group("", middleware.RateLimiter(10, nil))
 	authnRoute.Post("/authenticate", handler.Login)
 	authnRoute.Post("/register", handler.Register)
 
