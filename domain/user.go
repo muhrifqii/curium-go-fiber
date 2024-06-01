@@ -12,8 +12,9 @@ type User struct {
 	Password string `json:"-"`
 	Salt     string `json:"-"`
 
-	Status    string    `json:"status"`
-	LastLogin time.Time `json:"last_login"`
+	Status      string    `json:"-"`
+	LastLogin   time.Time `json:"-"`
+	LastLoginIp string    `json:"-"`
 
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`

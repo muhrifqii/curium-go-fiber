@@ -14,6 +14,7 @@ require (
 	github.com/gofiber/storage/redis/v3 v3.1.1 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/redis/go-redis/v9 v9.5.2 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 )
 

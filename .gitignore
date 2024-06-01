@@ -77,8 +77,10 @@ Temporary Items
 go.work
 go.work.sum
 
+.idea/
 .env
 bin/
 api_server
 tmp_app/
 *.log
+infras/postgresql/data

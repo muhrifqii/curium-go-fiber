@@ -19,7 +19,7 @@ include_ext = ["go", "yaml", "toml"]
 # Exclude specific regular expressions.
 exclude_regex = ["_test\\.go"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["tmp_app", "tmp"]
+exclude_dir = ["tmp_app", "tmp", "infras", ".github"]
 # It's not necessary to trigger build each time file changes if it's too frequent.
 delay = 1000 # ms
 

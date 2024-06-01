@@ -114,25 +114,30 @@ image-build:
 
 # # ~~~ Database Migrations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MYSQL_DSN := "mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@tcp($(MYSQL_ADDRESS))/$(MYSQL_DATABASE)"
+POSTGRE_DSN := "postgres://$(DATABASE_USER):$(DATABASE_PASS)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)?sslmode=disable"
 
 migrate-up: $(MIGRATE) ## Apply all (or N up) migrations.
 	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
-	migrate  -database $(MYSQL_DSN) -path=misc/migrations up ${NN}
+	migrate  -database $(POSTGRE_DSN) -path=scripts/migrations up ${NN}
 
 .PHONY: migrate-down
 migrate-down: $(MIGRATE) ## Apply all (or N down) migrations.
 	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
-	migrate  -database $(MYSQL_DSN) -path=misc/migrations down ${NN}
+	migrate  -database $(POSTGRE_DSN) -path=scripts/migrations down ${NN}
 
-.PHONY: migrate-drop
-migrate-drop: $(MIGRATE) ## Drop everything inside the database.
-	migrate  -database $(MYSQL_DSN) -path=misc/migrations drop
+# .PHONY: migrate-drop
+# migrate-drop: $(MIGRATE) ## Drop everything inside the database.
+# 	migrate  -database $(POSTGRE_DSN) -path=scripts/migrations drop
+
+.PHONY: migrate-dirty
+migrate-dirty: $(MIGRATE) ## Clean a dirty migration by force
+	@ read -p "Fixed migration error and continue the migration process on version: " N; \
+	migrate -database $(POSTGRE_DSN) -path=scripts/migrations force $${N}
 
 .PHONY: migrate-create
 migrate-create: $(MIGRATE) ## Create a set of up/down migrations with a specified name.
 	@ read -p "Please provide name for the migration: " Name; \
-	migrate create -ext sql -dir misc/migrations $${Name}
+	migrate create -ext sql -dir scripts/migrations -seq $${Name}
 
 # ~~~ Cleans ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

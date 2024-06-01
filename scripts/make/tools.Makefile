@@ -23,12 +23,12 @@ bin:
 MIGRATE := $(shell command -v migrate || echo "bin/migrate")
 migrate: bin/migrate ## Install migrate (database migration)
 
-bin/migrate: VERSION := 4.17.0
+bin/migrate: VERSION := 4.17.1
 bin/migrate: GITHUB  := golang-migrate/migrate
 bin/migrate: ARCHIVE := migrate.$(OSTYPE)-$(ARCH).tar.gz
 bin/migrate: bin
 	@ printf "Install migrate... "
-	@ curl -Ls $(shell echo $(call github_url) | tr A-Z a-z) | tar -zOxf - ./migrate > $@ && chmod +x $@
+	@ curl -Ls $(shell echo $(call github_url) | tr A-Z a-z) | tar -zOxf - migrate > $@ && chmod +x $@
 	@ echo "done."
 
 # ~~ [ air ] ~~~ https://github.com/cosmtrek/air ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,7 +36,7 @@ bin/migrate: bin
 AIR := $(shell command -v air || echo "bin/air")
 air: bin/air ## Installs air (go file watcher)
 
-bin/air: VERSION := 1.49.0
+bin/air: VERSION := 1.52.1
 bin/air: GITHUB  := cosmtrek/air
 bin/air: ARCHIVE := air_$(VERSION)_$(OSTYPE)_$(ARCH).tar.gz
 bin/air: bin
