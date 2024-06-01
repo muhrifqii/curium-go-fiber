@@ -1,8 +1,9 @@
-package main
+package server
 
 import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 	"github.com/muhrifqii/curium_go_fiber/config"
 	"github.com/muhrifqii/curium_go_fiber/internal/repository"
 	"github.com/muhrifqii/curium_go_fiber/internal/repository/postgresql"
@@ -14,12 +15,22 @@ import (
 	"go.uber.org/zap"
 )
 
-type Server struct {
-	app    *fiber.App
-	config config.ApiConfig
-}
+type (
+	Server struct {
+		app  *fiber.App
+		args ServerArgs
+	}
 
-func NewServer(conf config.ApiConfig, logger *zap.Logger, rdb *redis.Client) *Server {
+	ServerArgs struct {
+		Config      config.ApiConfig
+		Logger      *zap.Logger
+		RedisClient *redis.Client
+		DB          *sqlx.DB
+	}
+)
+
+func NewServer(args ServerArgs) *Server {
+
 	app := fiber.New(fiber.Config{
 		CaseSensitive:            true,
 		DisableHeaderNormalizing: true,
@@ -29,20 +40,20 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger, rdb *redis.Client) *Se
 	})
 
 	// build redis client on fiber.Storage
-	redisStorage := repository.NewStorageRedis(rdb)
+	redisStorage := repository.NewStorageRedis(args.RedisClient)
 
 	// prepare middleware
 	app.Use(middleware.Recover())
-	app.Use(middleware.Cors(conf))
-	app.Use(middleware.RequestID(conf))
-	app.Use(middleware.Logger(logger))
+	app.Use(middleware.Cors(args.Config))
+	app.Use(middleware.RequestID(args.Config))
+	app.Use(middleware.Logger(args.Logger))
 	app.Use(middleware.RateLimiter(50, redisStorage))
 	app.Use(middleware.ActuatorHealthCheck())
 
-	middleware.SetZapLogger(logger)
+	middleware.SetZapLogger(args.Logger)
 
 	// prepare route group
-	apiPath := conf.ApiPrefix + "/v1"
+	apiPath := args.Config.ApiPrefix + "/v1"
 	apiV1 := app.Group(apiPath)
 	publicApiV1 := app.Group(apiPath)
 
@@ -55,8 +66,8 @@ func NewServer(conf config.ApiConfig, logger *zap.Logger, rdb *redis.Client) *Se
 	rest.NewAuthnHandler(publicApiV1, nil)
 
 	return &Server{
-		app:    app,
-		config: conf,
+		app:  app,
+		args: args,
 	}
 }
 
@@ -65,7 +76,7 @@ func errorHandler(c *fiber.Ctx, err error) error {
 }
 
 func (s *Server) Run() error {
-	return s.app.Listen(s.config.Port)
+	return s.app.Listen(s.args.Config.Port)
 }
 
 func (s *Server) Shutdown() error {

@@ -5,7 +5,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/muhrifqii/curium_go_fiber/cmd/server"
 	"github.com/muhrifqii/curium_go_fiber/config"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -22,7 +25,7 @@ func init() {
 
 type AppProvider struct {
 	log    *zap.Logger
-	server *Server
+	server *server.Server
 	rdb    *redis.Client
 }
 
@@ -36,7 +39,12 @@ func InitializeApp() *AppProvider {
 		logger.Fatal("Could not connect to Redis", zap.Error(err))
 	}
 
-	server := InitializeServer(logger, rdb)
+	db, err := InitializeDB(config.InitDbConfig())
+	if err != nil {
+		logger.Fatal("Could not connect to DB", zap.Error(err))
+	}
+
+	server := InitializeServer(logger, rdb, db)
 
 	return &AppProvider{
 		log:    logger,
@@ -108,10 +116,25 @@ func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
 	return rdb, nil
 }
 
-func InitializeServer(logger *zap.Logger, rdb *redis.Client) *Server {
-	apiConf := config.InitApiConfig()
+func InitializeServer(logger *zap.Logger, rdb *redis.Client, db *sqlx.DB) *server.Server {
+	args := server.ServerArgs{
+		Config:      config.InitApiConfig(),
+		Logger:      logger,
+		DB:          db,
+		RedisClient: rdb,
+	}
 
-	return NewServer(apiConf, logger, rdb)
+	return server.NewServer(args)
+}
+
+func InitializeDB(conf config.DbConfig) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", conf.String())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
 
 func main() {

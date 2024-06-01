@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -95,4 +96,8 @@ func InitJwtConfig() JwtConfig {
 		Expiration: expiration,
 		CookieName: os.Getenv("JWT_COOKIE_NAME"),
 	}
+}
+
+func (d DbConfig) String() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", d.User, d.Password, d.Host, d.Port, d.Name)
 }
