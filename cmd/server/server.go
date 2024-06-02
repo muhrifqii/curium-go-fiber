@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/bytedance/sonic"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"github.com/muhrifqii/curium_go_fiber/config"
@@ -10,6 +11,7 @@ import (
 	"github.com/muhrifqii/curium_go_fiber/internal/rest"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/middleware"
+	"github.com/muhrifqii/curium_go_fiber/usecase/authn"
 	"github.com/muhrifqii/curium_go_fiber/usecase/user"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -24,6 +26,7 @@ type (
 	ServerArgs struct {
 		Config      config.ApiConfig
 		Logger      *zap.Logger
+		Validator   *validator.Validate
 		RedisClient *redis.Client
 		DB          *sqlx.DB
 	}
@@ -61,9 +64,10 @@ func NewServer(args ServerArgs) *Server {
 	userRepository := postgresql.NewUserRepository(nil)
 
 	// build service layer
-	svc := user.NewService(userRepository)
-	rest.NewUserHandler(apiV1, svc)
-	rest.NewAuthnHandler(publicApiV1, nil)
+	userSvc := user.NewService(userRepository)
+	rest.NewUserHandler(apiV1, userSvc)
+	authnSvc := authn.NewService(args.Logger, userRepository)
+	rest.NewAuthnHandler(publicApiV1, args.Validator, authnSvc)
 
 	return &Server{
 		app:  app,

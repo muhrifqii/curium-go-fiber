@@ -3,7 +3,10 @@ package rest
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
+	"github.com/muhrifqii/curium_go_fiber/internal/rest/dto"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/middleware"
 )
 
@@ -17,12 +20,14 @@ type (
 
 	AuthnHandler struct {
 		authnService AuthnService
+		validator    *validator.Validate
 	}
 )
 
-func NewAuthnHandler(router fiber.Router, svc AuthnService) {
+func NewAuthnHandler(router fiber.Router, validator *validator.Validate, svc AuthnService) {
 	handler := &AuthnHandler{
 		authnService: svc,
+		validator:    validator,
 	}
 
 	authnRoute := router.Group("", middleware.RateLimiter(10, nil))
@@ -40,7 +45,15 @@ func (h *AuthnHandler) Login(c *fiber.Ctx) error {
 }
 
 func (h *AuthnHandler) Register(c *fiber.Ctx) error {
-	return nil
+	// by default using register by email
+	var req dto.RegisterByEmailRequest
+	if err := c.BodyParser(&req); err != nil {
+		return api_error.NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
+	}
+	if err := h.validator.Struct(&req); err != nil {
+		return api_error.NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
+	}
+	return h.authnService.Register(c.Context())
 }
 
 func (h *AuthnHandler) Logout(c *fiber.Ctx) error {

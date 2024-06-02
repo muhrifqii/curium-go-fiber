@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -34,6 +35,8 @@ func InitializeApp() *AppProvider {
 
 	logger := InitializeLog(appConf)
 
+	validator := InitializeValidator()
+
 	rdb, err := InitializeRedis(appConf)
 	if err != nil {
 		logger.Fatal("Could not connect to Redis", zap.Error(err))
@@ -44,7 +47,7 @@ func InitializeApp() *AppProvider {
 		logger.Fatal("Could not connect to DB", zap.Error(err))
 	}
 
-	server := InitializeServer(logger, rdb, db)
+	server := InitializeServer(logger, validator, rdb, db)
 
 	return &AppProvider{
 		log:    logger,
@@ -103,6 +106,10 @@ func InitializeLog(appConf config.AppConfig) *zap.Logger {
 	return zap.New(coreLogger, zap.AddCaller(), zap.AddStacktrace(stackLevel))
 }
 
+func InitializeValidator() *validator.Validate {
+	return validator.New()
+}
+
 func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     appConf.RedisAddresss,
@@ -116,12 +123,13 @@ func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
 	return rdb, nil
 }
 
-func InitializeServer(logger *zap.Logger, rdb *redis.Client, db *sqlx.DB) *server.Server {
+func InitializeServer(logger *zap.Logger, validator *validator.Validate, rdb *redis.Client, db *sqlx.DB) *server.Server {
 	args := server.ServerArgs{
 		Config:      config.InitApiConfig(),
 		Logger:      logger,
 		DB:          db,
 		RedisClient: rdb,
+		Validator:   validator,
 	}
 
 	return server.NewServer(args)

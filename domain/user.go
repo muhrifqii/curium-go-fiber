@@ -13,11 +13,11 @@ type User struct {
 	Salt     string `json:"-"`
 
 	Status      string    `json:"-"`
-	LastLogin   time.Time `json:"-"`
-	LastLoginIp string    `json:"-"`
+	LastLogin   time.Time `json:"-" db:"last_login"`
+	LastLoginIp string    `json:"-" db:"last_login_ip"`
 
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
+	FirstName string    `json:"first_name" db:"first_name"`
+	LastName  string    `json:"last_name" db:"last_name"`
 	Birthday  time.Time `json:"birth_date"`
 	Gender    string    `json:"gender"`
 	Avatar    string    `json:"avatar"`

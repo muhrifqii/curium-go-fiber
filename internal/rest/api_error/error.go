@@ -12,8 +12,19 @@ type ApiErrorResponse struct {
 	StatusCode int `json:"-"`
 }
 
-func (e *ApiErrorResponse) Error() string {
+func (e ApiErrorResponse) Error() string {
 	return e.Message
+}
+
+func NewApiErrorResponse(statusCode int, message string) ApiErrorResponse {
+	return ApiErrorResponse{
+		ApiResponse: dto.ApiResponse[interface{}]{
+			Status:  "error",
+			Message: message,
+			Data:    nil,
+		},
+		StatusCode: statusCode,
+	}
 }
 
 func ApiErrorResponseHandler(c *fiber.Ctx, err error) error {
@@ -32,23 +43,17 @@ func ApiErrorResponseHandler(c *fiber.Ctx, err error) error {
 		r.Status = "error"
 		r.Message = err.Error()
 		r.Data = nil
-
 	}
 
 	return c.Status(code).JSON(*r)
 }
 
 func JwtErrorResponseHandler(c *fiber.Ctx, err error) error {
-	var r = ApiErrorResponse{
-		ApiResponse: dto.ApiResponse[interface{}]{
-			Status:  "error",
-			Message: err.Error(),
-			Data:    nil,
-		},
-	}
+	var r = NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
 	if err.Error() == "Missing or malformed JWT" {
-		return c.Status(fiber.StatusBadRequest).JSON(r)
+		return r
 	}
 	r.Message = "Unauthorized"
-	return c.Status(fiber.StatusUnauthorized).JSON(r)
+	r.StatusCode = fiber.StatusUnauthorized
+	return r
 }
