@@ -5,7 +5,7 @@ import "github.com/gofiber/fiber/v2"
 type ApiResponse[T any] struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
-	Data    T      `json:"data"`
+	Data    T      `json:"data,omitempty"`
 }
 
 func ReturnOkResponse[T interface{}](c *fiber.Ctx, data T) error {

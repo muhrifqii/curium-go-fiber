@@ -22,3 +22,10 @@ type User struct {
 	Gender    string    `json:"gender"`
 	Avatar    string    `json:"avatar"`
 }
+
+const (
+	UserStatusActive   = "active"
+	UserStatusPending  = "pending"
+	UserStatusInactive = "inactive"
+	UserStatusBanned   = "banned"
+)

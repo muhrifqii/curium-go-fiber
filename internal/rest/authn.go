@@ -12,10 +12,9 @@ import (
 
 type (
 	AuthnService interface {
-		Login(ctx context.Context) error
-		Register(ctx context.Context) error
+		Login(ctx context.Context, req dto.AuthnRequest) error
+		RegisterByEmail(ctx context.Context, req dto.RegisterByEmailRequest) error
 		Logout(ctx context.Context) error
-		RefreshToken(ctx context.Context) error
 	}
 
 	AuthnHandler struct {
@@ -53,7 +52,10 @@ func (h *AuthnHandler) Register(c *fiber.Ctx) error {
 	if err := h.validator.Struct(&req); err != nil {
 		return api_error.NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
 	}
-	return h.authnService.Register(c.Context())
+	if err := h.authnService.RegisterByEmail(c.Context(), req); err != nil {
+		return err
+	}
+	return dto.ReturnCreatedResponse[interface{}](c, nil)
 }
 
 func (h *AuthnHandler) Logout(c *fiber.Ctx) error {

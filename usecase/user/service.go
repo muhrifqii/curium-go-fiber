@@ -10,6 +10,7 @@ type (
 	UserRepository interface {
 		GetByIdentifier(ctx context.Context, identifier string) (domain.User, error)
 		CreateUser(ctx context.Context, user domain.User) error
+		IsUserExistByIdentifier(c context.Context, email, username string) (bool, error)
 	}
 
 	Service struct {
