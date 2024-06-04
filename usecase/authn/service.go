@@ -3,23 +3,24 @@ package authn
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/muhrifqii/curium_go_fiber/domain"
+	"github.com/muhrifqii/curium_go_fiber/internal/repository"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/dto"
-	"github.com/muhrifqii/curium_go_fiber/usecase/user"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type (
 	Service struct {
-		userRepository user.UserRepository
+		userRepository repository.UserRepository
 		log            *zap.Logger
 	}
 )
 
-func NewService(zap *zap.Logger, userRepository user.UserRepository) *Service {
+func NewService(zap *zap.Logger, userRepository repository.UserRepository) *Service {
 	return &Service{
 		log:            zap,
 		userRepository: userRepository,
@@ -41,7 +42,24 @@ func CheckPassword(hashedPassword, password string) error {
 }
 
 func (s *Service) Login(ctx context.Context, req dto.AuthnRequest) error {
-	panic("not implemented") // TODO: Implement
+	var (
+		user domain.User
+		err  error
+	)
+
+	if strings.Contains(req.Identifier, "@") {
+		user, err = s.userRepository.GetByEmail(ctx, req.Identifier)
+	} else {
+		user, err = s.userRepository.GetByUsername(ctx, req.Identifier)
+	}
+
+	if err != nil {
+		return err
+	}
+	if err = CheckPassword(user.Password, req.Password); err != nil {
+		return api_error.NewApiErrorResponse(http.StatusNotFound, "Invalid user/password")
+	}
+	return nil
 }
 
 func (s *Service) RegisterByEmail(ctx context.Context, req dto.RegisterByEmailRequest) error {
@@ -56,7 +74,7 @@ func (s *Service) RegisterByEmail(ctx context.Context, req dto.RegisterByEmailRe
 	if err != nil {
 		return err
 	}
-	user := domain.User{
+	user := &domain.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: hashedPassword,
