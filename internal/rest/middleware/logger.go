@@ -21,6 +21,7 @@ func Logger(l *zap.Logger) fiber.Handler {
 		FieldsFunc: func(c *fiber.Ctx) []zap.Field {
 			return []zap.Field{
 				zap.String("requestId", c.Context().UserValue("requestId").(string)),
+				// zap.String("requestPayload", string(c.Request().Body())),
 			}
 		},
 	})

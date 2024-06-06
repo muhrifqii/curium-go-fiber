@@ -8,7 +8,7 @@ import (
 )
 
 type ApiErrorResponse struct {
-	dto.ApiResponse[interface{}]
+	dto.ApiResponse[map[string]string]
 	StatusCode int `json:"-"`
 }
 
@@ -16,12 +16,18 @@ func (e ApiErrorResponse) Error() string {
 	return e.Message
 }
 
-func NewApiErrorResponse(statusCode int, message string) ApiErrorResponse {
-	return ApiErrorResponse{
-		ApiResponse: dto.ApiResponse[interface{}]{
+func NewApiErrorResponse(statusCode int, message string, data ...map[string]string) *ApiErrorResponse {
+	var additionalData map[string]string
+	if len(data) == 0 {
+		additionalData = nil
+	} else {
+		additionalData = data[0]
+	}
+	return &ApiErrorResponse{
+		ApiResponse: dto.ApiResponse[map[string]string]{
 			Status:  "error",
 			Message: message,
-			Data:    nil,
+			Data:    additionalData,
 		},
 		StatusCode: statusCode,
 	}
@@ -45,7 +51,7 @@ func ApiErrorResponseHandler(c *fiber.Ctx, err error) error {
 		r.Data = nil
 	}
 
-	return c.Status(code).JSON(*r)
+	return c.Status(code).JSON(r)
 }
 
 func JwtErrorResponseHandler(c *fiber.Ctx, err error) error {

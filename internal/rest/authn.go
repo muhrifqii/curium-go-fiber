@@ -8,6 +8,8 @@ import (
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/dto"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/middleware"
+	"github.com/muhrifqii/curium_go_fiber/internal/utils"
+	"go.uber.org/zap"
 )
 
 type (
@@ -20,16 +22,18 @@ type (
 	AuthnHandler struct {
 		authnService AuthnService
 		validator    *validator.Validate
+		log          *zap.Logger
 	}
 )
 
-func NewAuthnHandler(router fiber.Router, validator *validator.Validate, svc AuthnService) {
+func NewAuthnHandler(router fiber.Router, svc AuthnService, params utils.HandlerParams) {
 	handler := &AuthnHandler{
 		authnService: svc,
-		validator:    validator,
+		validator:    params.Validator,
+		log:          params.Logger,
 	}
 
-	authnRoute := router.Group("", middleware.RateLimiter(10, nil))
+	authnRoute := router.Group("", middleware.RateLimiter(10, params.Redis))
 	authnRoute.Post("/authenticate", handler.Login)
 	authnRoute.Post("/register", handler.Register)
 

@@ -34,6 +34,7 @@ func InitializeApp() *AppProvider {
 	appConf := config.InitAppConfig()
 
 	logger := InitializeLog(appConf)
+	zap.ReplaceGlobals(logger)
 
 	validator := InitializeValidator()
 

@@ -11,6 +11,7 @@ import (
 	"github.com/muhrifqii/curium_go_fiber/internal/rest"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
 	"github.com/muhrifqii/curium_go_fiber/internal/rest/middleware"
+	"github.com/muhrifqii/curium_go_fiber/internal/utils"
 	"github.com/muhrifqii/curium_go_fiber/usecase/authn"
 	"github.com/muhrifqii/curium_go_fiber/usecase/user"
 	"github.com/redis/go-redis/v9"
@@ -61,13 +62,17 @@ func NewServer(args ServerArgs) *Server {
 	publicApiV1 := app.Group(apiPath)
 
 	// prepare repository layer
-	userRepository := postgresql.NewUserRepository(nil)
+	userRepository := postgresql.NewUserRepository(args.DB)
 
 	// build service layer
 	userSvc := user.NewService(userRepository)
 	rest.NewUserHandler(apiV1, userSvc)
 	authnSvc := authn.NewService(args.Logger, userRepository)
-	rest.NewAuthnHandler(publicApiV1, args.Validator, authnSvc)
+	rest.NewAuthnHandler(publicApiV1, authnSvc, utils.HandlerParams{
+		Validator: args.Validator,
+		Logger:    args.Logger,
+		Redis:     redisStorage,
+	})
 
 	return &Server{
 		app:  app,
