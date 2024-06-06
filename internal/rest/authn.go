@@ -54,7 +54,7 @@ func (h *AuthnHandler) Register(c *fiber.Ctx) error {
 		return api_error.NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
 	}
 	if err := h.validator.Struct(&req); err != nil {
-		return api_error.NewApiErrorResponse(fiber.StatusBadRequest, err.Error())
+		return err
 	}
 	if err := h.authnService.RegisterByEmail(c.Context(), req); err != nil {
 		return err
