@@ -34,18 +34,15 @@ func (r *UserRepository) GetByEmail(c context.Context, email string) (domain.Use
 
 func (r *UserRepository) CreateUser(c context.Context, user *domain.User) error {
 
-	_, err := r.DB.NamedExec("INSERT INTO users (username, email, phone, password, status, first_name, last_name) VALUES (:username, :email, :phone, :password, :status, :first_name, :last_name)", user)
+	_, err := r.DB.NamedExec("INSERT INTO users (username, email, phone, a_password, a_status, first_name, last_name) VALUES (:username, :email, :phone, :a_password, :a_status, :first_name, :last_name)", user)
 
 	return err
 }
 
 func (r *UserRepository) IsUserExistByIdentifier(c context.Context, email, username string) (bool, error) {
 	var exist bool
-	err := r.DB.Get(&exist, `SELECT EXISTS(SELECT 1 FROM users u WHERE LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($1))`, username, email)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	err := r.DB.Get(&exist, `SELECT EXISTS(SELECT 1 FROM users u WHERE LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($2))`, username, email)
+	return exist, err
 }
 
 func (r *UserRepository) OnUserLoggedIn(c context.Context, id int64, time time.Time, ip, ua string) error {
