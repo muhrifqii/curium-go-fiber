@@ -5,9 +5,10 @@ import "time"
 type User struct {
 	BaseModel
 
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone"`
+	Organization string `json:"organization"`
 
 	Password            string     `json:"-" db:"a_password"`
 	LastPasswordUpdated *time.Time `json:"-" db:"last_password_updated"`
@@ -35,3 +36,18 @@ const (
 	UserStatusInactive = "inactive"
 	UserStatusBanned   = "banned"
 )
+
+type OAuthProvider struct {
+	BaseModel
+	Name        string `json:"name" db:"provider_name"`
+	DisplayName string `json:"display_name" db:"provider_display_name"`
+}
+
+type UserOauthAccount struct {
+	BaseModel
+	UserID          int64  `json:"-" db:"user_id"`
+	OAuthProviderID int64  `json:"-" db:"provider_id"`
+	OAuthID         string `json:"-" db:"oauth_id"`
+	Email           string `json:"-" db:"email"`
+	RefreshToken    string `json:"-" db:"refresh_token"`
+}

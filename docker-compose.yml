@@ -4,6 +4,11 @@ networks:
   intranet:
     external: false
 
+volumes:
+  postgres_data:
+  redis_data:
+
+
 services:
   web:
     image: curium-go-fiber
@@ -38,7 +43,7 @@ services:
       timeout: 20s
       retries: 5
     volumes:
-      - ./infras/postgresql/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - intranet
 
@@ -50,6 +55,8 @@ services:
       - .env
     ports:
       - ${REDIS_PORT}:6379
+    volumes:
+      - redis_data:/data
     # deploy:
     #   resources:
     #     limits:
