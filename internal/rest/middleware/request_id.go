@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/fiber/v2/utils"
-	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/config"
 )
 
 func RequestID(conf config.ApiConfig) fiber.Handler {

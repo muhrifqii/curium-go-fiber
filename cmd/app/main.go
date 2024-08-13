@@ -9,8 +9,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/muhrifqii/curium_go_fiber/cmd/server"
-	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/server"
+	customValidator "github.com/muhrifqii/curium_go_fiber/internal/validator"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -108,7 +109,9 @@ func InitializeLog(appConf config.AppConfig) *zap.Logger {
 }
 
 func InitializeValidator() *validator.Validate {
-	return validator.New()
+	v := validator.New()
+	customValidator.RegisterCustomFieldValidators(v)
+	return v
 }
 
 func InitializeRedis(appConf config.AppConfig) (*redis.Client, error) {
@@ -153,6 +156,11 @@ func main() {
 	defer log.Sync()
 	defer app.rdb.Close()
 
+	log.Info("Provisioning step")
+	app.server.ProvisionSystemUser()
+	app.server.ProvisionDefaultAuthClient()
+
+	log.Info("Starting server")
 	if err := app.server.Run(); err != nil {
 		log.Fatal("Failed to start server:", zap.Error(err))
 	}

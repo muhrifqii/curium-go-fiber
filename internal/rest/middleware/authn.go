@@ -3,8 +3,8 @@ package middleware
 import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/muhrifqii/curium_go_fiber/config"
-	"github.com/muhrifqii/curium_go_fiber/internal/rest/api_error"
+	"github.com/muhrifqii/curium_go_fiber/internal/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/rest/rest_utils"
 )
 
 func RequireAuthn(conf config.JwtConfig) fiber.Handler {
@@ -12,7 +12,7 @@ func RequireAuthn(conf config.JwtConfig) fiber.Handler {
 		SigningKey: jwtware.SigningKey{
 			Key: []byte(conf.Secret),
 		},
-		ErrorHandler: api_error.JwtErrorResponseHandler,
+		ErrorHandler: rest_utils.JwtErrorResponseHandler,
 	})
 }
 

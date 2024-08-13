@@ -32,13 +32,21 @@ type (
 		ApiPrefix       string
 		AllowedOrigins  string
 		HeaderRequestID string
+		JwtConfig       JwtConfig
 	}
 
 	JwtConfig struct {
-		Secret     string
-		Expiration int
-		CookieName string
+		Secret                  string
+		RefreshSecret           string
+		Expiration              int
+		RefreshExpirationInDays int
+		CookieName              string
 	}
+)
+
+const (
+	ContextKeyAuthnToken = "authn_token"
+	ContextKeyRequestID  = "request_id"
 )
 
 func InitAppConfig() AppConfig {
@@ -83,6 +91,7 @@ func InitApiConfig() ApiConfig {
 		ApiPrefix:       os.Getenv("SERVER_API_PREFIX"),
 		AllowedOrigins:  os.Getenv("SERVER_ALLOW_ORIGINS"),
 		HeaderRequestID: os.Getenv("HEADER_REQ_ID"),
+		JwtConfig:       InitJwtConfig(),
 	}
 }
 
@@ -91,10 +100,16 @@ func InitJwtConfig() JwtConfig {
 	if err != nil {
 		expiration = 5
 	}
+	refreshExpiration, err := strconv.Atoi(os.Getenv("JWT_REFRESH_EXPIRATION_DAYS"))
+	if err != nil {
+		refreshExpiration = 14
+	}
 	return JwtConfig{
-		Secret:     os.Getenv("JWT_SECRET"),
-		Expiration: expiration,
-		CookieName: os.Getenv("JWT_COOKIE_NAME"),
+		Secret:                  os.Getenv("JWT_SECRET"),
+		RefreshSecret:           os.Getenv("JWT_REFRESH_SECRET"),
+		Expiration:              expiration,
+		RefreshExpirationInDays: refreshExpiration,
+		CookieName:              os.Getenv("JWT_COOKIE_NAME"),
 	}
 }
 

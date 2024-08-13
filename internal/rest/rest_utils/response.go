@@ -1,15 +1,12 @@
-package dto
+package rest_utils
 
-import "github.com/gofiber/fiber/v2"
-
-type ApiResponse[T any] struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Data    T      `json:"data,omitempty"`
-}
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/muhrifqii/curium_go_fiber/domain"
+)
 
 func ReturnOkResponse[T interface{}](c *fiber.Ctx, data T) error {
-	r := ApiResponse[T]{
+	r := domain.ApiResponse[T]{
 		Status:  "success",
 		Message: "",
 		Data:    data,
@@ -18,7 +15,7 @@ func ReturnOkResponse[T interface{}](c *fiber.Ctx, data T) error {
 }
 
 func ReturnCreatedResponse[T interface{}](c *fiber.Ctx, data T) error {
-	r := ApiResponse[T]{
+	r := domain.ApiResponse[T]{
 		Status:  "success",
 		Message: "",
 		Data:    data,

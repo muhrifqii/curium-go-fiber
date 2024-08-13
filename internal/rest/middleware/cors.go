@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/muhrifqii/curium_go_fiber/config"
+	"github.com/muhrifqii/curium_go_fiber/internal/config"
 )
 
 func Cors(conf config.ApiConfig) fiber.Handler {
