@@ -1,9 +1,11 @@
 # This makefile should be used to hold functions/variables
 
+SEC_ARCH := $(ARCH)
 ifeq ($(ARCH),x86_64)
 	ARCH := amd64
 else ifeq ($(ARCH),aarch64)
-	ARCH := arm64 
+	ARCH := arm64
+	SEC_ARCH := arm64
 endif
 
 
@@ -36,7 +38,7 @@ bin/migrate: bin
 AIR := $(shell command -v air || echo "bin/air")
 air: bin/air ## Installs air (go file watcher)
 
-bin/air: VERSION := 1.52.1
+bin/air: VERSION := 1.52.3
 bin/air: GITHUB  := cosmtrek/air
 bin/air: ARCHIVE := air_$(VERSION)_$(OSTYPE)_$(ARCH).tar.gz
 bin/air: bin
@@ -50,7 +52,7 @@ bin/air: bin
 GOTESTSUM := $(shell command -v gotestsum || echo "bin/gotestsum")
 gotestsum: bin/gotestsum ## Installs gotestsum (testing go code)
 
-bin/gotestsum: VERSION := 1.11.0
+bin/gotestsum: VERSION := 1.12.0
 bin/gotestsum: GITHUB  := gotestyourself/gotestsum
 bin/gotestsum: ARCHIVE := gotestsum_$(VERSION)_$(OSTYPE)_$(ARCH).tar.gz
 bin/gotestsum: bin
@@ -64,11 +66,11 @@ TPARSE := $(shell command -v tparse || echo "bin/tparse")
 tparse: bin/tparse ## Installs tparse (testing go code)
 
 # eg https://github.com/mfridman/tparse/releases/download/v0.13.2/tparse_darwin_arm64
-bin/tparse: VERSION := 0.13.2
+bin/tparse: VERSION := 0.14.0
 bin/tparse: GITHUB  := mfridman/tparse
-bin/tparse: ARCHIVE := tparse_$(OSTYPE)_$(ARCH)
+bin/tparse: ARCHIVE := tparse_$(OSTYPE)_$(SEC_ARCH)
 bin/tparse: bin
-	@ printf "Install tparse... "
+	@ printf "Install tparse... "S
 	@ curl -Ls $(call github_url) > $@ && chmod +x $@
 	@ echo "done."
 
@@ -77,11 +79,20 @@ bin/tparse: bin
 MOCKERY := $(shell command -v mockery || echo "bin/mockery")
 mockery: bin/mockery ## Installs mockery (mocks generation)
 
-bin/mockery: VERSION := 2.42.0
+bin/mockery: VERSION := 2.44.2
 bin/mockery: GITHUB  := vektra/mockery
-bin/mockery: ARCHIVE := mockery_$(VERSION)_$(OSTYPE)_$(ARCH).tar.gz
+bin/mockery: ARCHIVE := mockery_$(VERSION)_$(OSTYPE)_$(shell sed 's/\(.\)/\U\1/' <<< $(SEC_ARCH)).tar.gz
 bin/mockery: bin
 	@ printf "Install mockery... "
+	@ curl -Ls $(call github_url) > $@ && chmod +x $@
+	@ echo "done."
+
+bin/mockery: VERSION := 2.44.2
+bin/mockery: GITHUB  := vektra/mockery
+bin/mockery: ARCHIVE := mockery_$(VERSION)_$(OSTYPE)_$(SEC_ARCH).tar.gz
+bin/mockery: bin
+	@ printf "Install mockery... "
+	@ printf "$(github_url)"
 	@ curl -Ls $(call github_url) | tar -zOxf -  mockery > $@ && chmod +x $@
 	@ echo "done."
 
@@ -90,7 +101,7 @@ bin/mockery: bin
 GOLANGCI := $(shell command -v golangci-lint || echo "bin/golangci-lint")
 golangci-lint: bin/golangci-lint ## Installs golangci-lint (linter)
 
-bin/golangci-lint: VERSION := 1.56.2
+bin/golangci-lint: VERSION := 1.60.1
 bin/golangci-lint: GITHUB  := golangci/golangci-lint
 bin/golangci-lint: ARCHIVE := golangci-lint-$(VERSION)-$(OSTYPE)-$(ARCH).tar.gz
 bin/golangci-lint: bin
